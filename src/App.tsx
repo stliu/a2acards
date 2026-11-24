@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { Bell, Radio, Search, ShieldCheck, X } from "lucide-react";
-import registryData from "./generated/registry.json";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { Bell, CheckCircle2, ChevronLeft, ChevronRight, Radio, Search, ShieldCheck, X } from "lucide-react";
+import summaryData from "./generated/registry-summary.json";
 import { CORE_PROTOCOL_BINDINGS, REGISTRY_CATEGORIES } from "./lib/a2a-schema";
-import type { RegistryCategory, RegistryEntry, RegistryIndex } from "./lib/a2a-schema";
+import type { RegistryCategory, RegistrySummaryIndex, RegistrySummaryItem } from "./lib/a2a-schema";
 import { AgentCardTile } from "./components/AgentCardTile";
 import { CardInspector } from "./components/CardInspector";
 import { Header } from "./components/Header";
@@ -11,13 +11,16 @@ import { SubmitView } from "./components/SubmitView";
 import { ValidatorView } from "./components/ValidatorView";
 import { VALIDATOR_PRESETS } from "./lib/ui-helpers";
 
-const registry = registryData as RegistryIndex;
+const registry = summaryData as RegistrySummaryIndex;
+const PAGE_SIZE = 24;
 
 function readInitialState(): { tab: AppTab; cardSlug: string | null } {
+  const pathname = window.location.pathname.replace(/\/+$/, "");
   const params = new URLSearchParams(window.location.search);
   const rawTab = params.get("tab");
-  const tab: AppTab =
-    rawTab === "validator" || rawTab === "submit" ? rawTab : "directory";
+  let tab: AppTab = "directory";
+  if (pathname === "/validator" || rawTab === "validator") tab = "validator";
+  else if (pathname === "/submit" || rawTab === "submit") tab = "submit";
   const cardSlug = params.get("card");
   return { tab, cardSlug };
 }
@@ -26,29 +29,37 @@ export function App() {
   const initial = useMemo(() => readInitialState(), []);
   const [activeTab, setActiveTab] = useState<AppTab>(initial.tab);
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearch = useDeferredValue(searchQuery);
   const [selectedCategory, setSelectedCategory] = useState<"All" | RegistryCategory>("All");
   const [selectedBinding, setSelectedBinding] = useState<string | null>(null);
+  const [onlyV1Valid, setOnlyV1Valid] = useState(false);
   const [onlyStreaming, setOnlyStreaming] = useState(false);
   const [onlyPush, setOnlyPush] = useState(false);
   const [onlySigned, setOnlySigned] = useState(false);
+  const [page, setPage] = useState(1);
   const [validatorJson, setValidatorJson] = useState(VALIDATOR_PRESETS.minimalV1.json);
-  const [selectedEntry, setSelectedEntry] = useState<RegistryEntry | null>(() => {
+  const [selectedItem, setSelectedItem] = useState<RegistrySummaryItem | null>(() => {
     if (!initial.cardSlug) return null;
     return registry.entries.find((e) => e.slug === initial.cardSlug) ?? null;
   });
 
   useEffect(() => {
+    const basePath =
+      activeTab === "validator" ? "/validator/" : activeTab === "submit" ? "/submit/" : "/";
     const params = new URLSearchParams();
-    if (activeTab !== "directory") {
-      params.set("tab", activeTab);
+    if (selectedItem) {
+      params.set("card", selectedItem.slug);
     }
-    if (selectedEntry) {
-      params.set("card", selectedEntry.slug);
+    const qs = params.toString();
+    const nextUrl = qs ? `${basePath}?${qs}` : basePath;
+    if (`${window.location.pathname}${window.location.search}` !== nextUrl) {
+      window.history.replaceState(null, "", nextUrl);
     }
-    const queryString = params.toString();
-    const nextUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
-    window.history.replaceState(null, "", nextUrl);
-  }, [activeTab, selectedEntry]);
+  }, [activeTab, selectedItem]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [deferredSearch, selectedCategory, selectedBinding, onlyV1Valid, onlyStreaming, onlyPush, onlySigned]);
 
   const categoryCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -60,48 +71,44 @@ export function App() {
   }, []);
 
   const filteredEntries = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    return registry.entries.filter((entry) => {
-      if (selectedCategory !== "All" && entry.category !== selectedCategory) {
-        return false;
-      }
-      if (
-        selectedBinding &&
-        !entry.card.supportedInterfaces.some((i) => i.protocolBinding === selectedBinding)
-      ) {
-        return false;
-      }
-      if (onlyStreaming && !entry.card.capabilities.streaming) {
-        return false;
-      }
-      if (onlyPush && !entry.card.capabilities.pushNotifications) {
-        return false;
-      }
-      if (onlySigned && !entry.signed) {
-        return false;
-      }
+    const q = deferredSearch.trim().toLowerCase();
+    return registry.entries.filter((item) => {
+      if (selectedCategory !== "All" && item.category !== selectedCategory) return false;
+      if (selectedBinding && !item.bindings.includes(selectedBinding)) return false;
+      if (onlyV1Valid && !item.v1Valid) return false;
+      if (onlyStreaming && !item.streaming) return false;
+      if (onlyPush && !item.pushNotifications) return false;
+      if (onlySigned && !item.signed) return false;
       if (!q) return true;
 
       const haystack = [
-        entry.slug,
-        entry.category,
-        entry.card.name,
-        entry.card.description,
-        entry.card.provider?.organization ?? "",
-        ...entry.card.supportedInterfaces.map((i) => i.protocolBinding),
-        ...entry.card.skills.flatMap((s) => [s.id, s.name, s.description, ...s.tags]),
+        item.slug,
+        item.category,
+        item.name,
+        item.description,
+        item.organization,
+        ...item.bindings,
+        ...item.tags,
       ]
         .join(" ")
         .toLowerCase();
 
       return haystack.includes(q);
     });
-  }, [searchQuery, selectedCategory, selectedBinding, onlyStreaming, onlyPush, onlySigned]);
+  }, [deferredSearch, selectedCategory, selectedBinding, onlyV1Valid, onlyStreaming, onlyPush, onlySigned]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredEntries.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageEntries = useMemo(() => {
+    const start = (safePage - 1) * PAGE_SIZE;
+    return filteredEntries.slice(start, start + PAGE_SIZE);
+  }, [filteredEntries, safePage]);
 
   const hasActiveFilters =
     searchQuery.trim().length > 0 ||
     selectedCategory !== "All" ||
     selectedBinding !== null ||
+    onlyV1Valid ||
     onlyStreaming ||
     onlyPush ||
     onlySigned;
@@ -110,6 +117,7 @@ export function App() {
     setSearchQuery("");
     setSelectedCategory("All");
     setSelectedBinding(null);
+    setOnlyV1Valid(false);
     setOnlyStreaming(false);
     setOnlyPush(false);
     setOnlySigned(false);
@@ -117,7 +125,7 @@ export function App() {
 
   function handleOpenInValidator(jsonText: string) {
     setValidatorJson(jsonText);
-    setSelectedEntry(null);
+    setSelectedItem(null);
     setActiveTab("validator");
   }
 
@@ -132,18 +140,24 @@ export function App() {
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6">
         {activeTab === "directory" && (
           <div className="space-y-5">
-            {/* Compact utilitarian registry header */}
             <div className="flex flex-col justify-between gap-4 border-b border-[#E2E6EC] pb-5 md:flex-row md:items-end">
               <div className="space-y-1">
                 <h1 className="text-[22px] font-semibold text-[#111418]">
                   A2A Agent Card Directory
                 </h1>
                 <p className="text-[14px] text-[#4F5866]">
-                  Discover, inspect, and validate{" "}
+                  Live daily-crawled index of{" "}
                   <code className="break-all rounded bg-[#E9ECF1] px-1.5 py-0.5 text-[12px] text-[#111418] sm:break-normal">
                     /.well-known/agent-card.json
                   </code>{" "}
-                  manifests for Agent2Agent v1.0 interoperability.
+                  endpoints ·{" "}
+                  <span className="font-mono text-[13px] text-[#0A7C59]">
+                    {registry.stats.v1Compliant} v1.0 valid
+                  </span>
+                  {" · "}
+                  <a href="/stats/" className="text-[#0A7C59] hover:underline">
+                    Ecosystem report
+                  </a>
                 </p>
               </div>
 
@@ -153,7 +167,7 @@ export function App() {
                   type="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search agents, skills, tags..."
+                  placeholder="Search agents, domains, tags..."
                   aria-label="Search Agent Cards"
                   className="h-9 w-full rounded-md border border-[#D0D5DD] bg-white pr-8 pl-9 text-[13px] text-[#111418] placeholder:text-[#98A2B3] focus:border-[#0A7C59] focus:outline-none"
                 />
@@ -170,7 +184,6 @@ export function App() {
               </div>
             </div>
 
-            {/* Category & protocol filters */}
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Categories">
                 {(["All", ...REGISTRY_CATEGORIES] as Array<"All" | RegistryCategory>).map(
@@ -206,7 +219,21 @@ export function App() {
 
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="mr-1 text-[12px] font-medium text-[#6B7482]">Binding:</span>
+                  <button
+                    type="button"
+                    onClick={() => setOnlyV1Valid((v) => !v)}
+                    className={`inline-flex h-7 items-center gap-1 rounded border px-2 text-[12px] font-medium transition-colors ${
+                      onlyV1Valid
+                        ? "border-[#0A7C59] bg-[#ECFDF5] text-[#047857]"
+                        : "border-[#E2E6EC] bg-white text-[#4F5866] hover:border-[#98A2B3]"
+                    }`}
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <span>v1.0 Valid</span>
+                  </button>
+
+                  <span className="mx-0.5 h-4 w-px bg-[#DCE1E8]" />
+
                   {CORE_PROTOCOL_BINDINGS.map((binding) => {
                     const active = selectedBinding === binding;
                     return (
@@ -225,7 +252,7 @@ export function App() {
                     );
                   })}
 
-                  <span className="mx-1 h-4 w-px bg-[#DCE1E8]" />
+                  <span className="mx-0.5 h-4 w-px bg-[#DCE1E8]" />
 
                   <button
                     type="button"
@@ -284,8 +311,7 @@ export function App() {
               </div>
             </div>
 
-            {/* Cards Grid */}
-            {filteredEntries.length === 0 ? (
+            {pageEntries.length === 0 ? (
               <div className="rounded-lg border border-[#E2E6EC] bg-white px-6 py-12 text-center">
                 <p className="text-[14px] font-medium text-[#111418]">
                   No Agent Cards match the current filters.
@@ -299,15 +325,51 @@ export function App() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredEntries.map((entry) => (
-                  <AgentCardTile
-                    key={entry.slug}
-                    entry={entry}
-                    onSelect={setSelectedEntry}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {pageEntries.map((item) => (
+                    <AgentCardTile
+                      key={item.slug}
+                      item={item}
+                      onSelect={setSelectedItem}
+                    />
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between border-t border-[#E2E6EC] pt-4 text-[12px] text-[#4F5866]">
+                    <span className="font-mono">
+                      Page {safePage} of {totalPages}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        disabled={safePage <= 1}
+                        onClick={() => {
+                          setPage((p) => Math.max(1, p - 1));
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        className="inline-flex h-8 items-center gap-1 rounded-md border border-[#D0D5DD] bg-white px-2.5 font-medium text-[#111418] hover:border-[#98A2B3] disabled:opacity-40"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                        <span>Previous</span>
+                      </button>
+                      <button
+                        type="button"
+                        disabled={safePage >= totalPages}
+                        onClick={() => {
+                          setPage((p) => Math.min(totalPages, p + 1));
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        className="inline-flex h-8 items-center gap-1 rounded-md border border-[#D0D5DD] bg-white px-2.5 font-medium text-[#111418] hover:border-[#98A2B3] disabled:opacity-40"
+                      >
+                        <span>Next</span>
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
@@ -365,8 +427,27 @@ export function App() {
             >
               /registry/index.json
             </a>
+            <a
+              href="/llms.txt"
+              target="_blank"
+              rel="noreferrer"
+              className="font-mono hover:text-[#0A7C59] hover:underline"
+            >
+              /llms.txt
+            </a>
+            <a
+              href="/sitemap.xml"
+              target="_blank"
+              rel="noreferrer"
+              className="font-mono hover:text-[#0A7C59] hover:underline"
+            >
+              /sitemap.xml
+            </a>
           </div>
           <div className="flex items-center gap-4">
+            <a href="/stats/" className="hover:text-[#111418] hover:underline">
+              Ecosystem Stats
+            </a>
             <a
               href="https://a2a-protocol.org/latest/specification/"
               target="_blank"
@@ -387,10 +468,10 @@ export function App() {
         </div>
       </footer>
 
-      {selectedEntry && (
+      {selectedItem && (
         <CardInspector
-          entry={selectedEntry}
-          onClose={() => setSelectedEntry(null)}
+          summary={selectedItem}
+          onClose={() => setSelectedItem(null)}
           onOpenInValidator={handleOpenInValidator}
         />
       )}

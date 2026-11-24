@@ -1,0 +1,31 @@
+name: Submit A2A Agent Card
+description: Request indexing of a live /.well-known/agent-card.json endpoint on a2acards.com
+title: "[Card] "
+labels: ["card-submission"]
+body:
+  - type: input
+    id: card_url
+    attributes:
+      label: Discovery Card URL
+      description: Public HTTPS URL serving your A2A Agent Card
+      placeholder: https://agent.example.com/.well-known/agent-card.json
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Coding & Dev
+        - Data & Research
+        - Finance & Ops
+        - Travel & Commerce
+        - Enterprise
+        - Creative & Media
+    validations:
+      required: true
+  - type: input
+    id: repo_url
+    attributes:
+      label: Repository or Documentation URL (optional)
+      placeholder: https://github.com/org/repo

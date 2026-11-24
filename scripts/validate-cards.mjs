@@ -1,14 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
-import { validateAgentCard, validateRegistryEntry } from "../src/lib/a2a-validator.js";
+import {
+  isRecognizableAgentCard,
+  validateAgentCard,
+  validateRegistryEntry,
+} from "../src/lib/a2a-validator.js";
 
 const rootDir = path.resolve(import.meta.dirname, "..");
 const cardsDir = path.join(rootDir, "registry", "cards");
+const crawledPath = path.join(rootDir, "registry", "crawled", "cards.json");
 const selfCardPath = path.join(rootDir, "public", ".well-known", "agent-card.json");
 
 let failed = false;
 
-// Validate site's own well-known card
 if (fs.existsSync(selfCardPath)) {
   const selfCard = JSON.parse(fs.readFileSync(selfCardPath, "utf8"));
   const result = validateAgentCard(selfCard);
@@ -27,11 +31,6 @@ const files = fs
   .readdirSync(cardsDir)
   .filter((name) => name.endsWith(".json"))
   .sort();
-
-if (files.length === 0) {
-  console.error("No card files found in registry/cards/");
-  process.exit(1);
-}
 
 const seenSlugs = new Set();
 
@@ -61,13 +60,26 @@ for (const file of files) {
       console.error(`  - [${err.path}] ${err.message}`);
     }
   } else {
-    const warnSuffix = result.warnings.length > 0 ? ` (${result.warnings.length} warnings)` : "";
-    console.log(`OK   registry/cards/${file}${warnSuffix}`);
+    console.log(`OK   registry/cards/${file}`);
   }
+}
+
+let crawledCount = 0;
+if (fs.existsSync(crawledPath)) {
+  const crawled = JSON.parse(fs.readFileSync(crawledPath, "utf8"));
+  for (const entry of crawled.entries || []) {
+    if (!entry.slug || !isRecognizableAgentCard(entry.card)) {
+      failed = true;
+      console.error(`FAIL registry/crawled/cards.json entry "${entry.slug || "unknown"}"`);
+    } else {
+      crawledCount++;
+    }
+  }
+  console.log(`OK   registry/crawled/cards.json (${crawledCount} crawled entries verified)`);
 }
 
 if (failed) {
   process.exit(1);
 }
 
-console.log(`\nValidated ${files.length} registry cards successfully.`);
+console.log(`\nValidated ${files.length} curated + ${crawledCount} crawled cards successfully.`);

@@ -97,3 +97,22 @@ test("validates registry wrapper and filename slug match", () => {
   assert.equal(mismatch.valid, false);
   assert.ok(mismatch.errors.some((e) => e.path === "slug"));
 });
+
+import { extractInterfaces, isRecognizableAgentCard } from "../src/lib/a2a-validator.js";
+
+test("extracts normalized interfaces from legacy v0.3 cards", () => {
+  const legacy = {
+    name: "Legacy Weather",
+    description: "Legacy weather agent",
+    protocolVersion: "0.3.0",
+    url: "https://weather.example.com/a2a",
+    preferredTransport: "HTTP+JSON",
+    capabilities: { streaming: true },
+  };
+  assert.equal(isRecognizableAgentCard(legacy), true);
+  const ifaces = extractInterfaces(legacy);
+  assert.equal(ifaces.length, 1);
+  assert.equal(ifaces[0].url, "https://weather.example.com/a2a");
+  assert.equal(ifaces[0].protocolBinding, "HTTP+JSON");
+  assert.equal(ifaces[0].protocolVersion, "0.3.0");
+});

@@ -1,0 +1,31 @@
+{
+  "seeds": [
+    {
+      "url": "https://a2acards.com/.well-known/agent-card.json",
+      "category": "Coding & Dev",
+      "repoUrl": "https://github.com/stliu/a2acards"
+    },
+    {
+      "url": "https://specification.website/.well-known/agent-card.json",
+      "category": "Coding & Dev",
+      "repoUrl": "https://github.com/jdevalk/specification.website"
+    },
+    {
+      "url": "https://webspecification.com/.well-known/agent-card.json",
+      "category": "Coding & Dev"
+    },
+    {
+      "url": "https://www.agentcard.net/.well-known/agent-card.json",
+      "category": "Coding & Dev"
+    }
+  ],
+  "feeds": [
+    {
+      "name": "a2aregistry.org",
+      "type": "a2aregistry-api",
+      "url": "https://a2aregistry.org/api/agents",
+      "maxCandidates": 160
+    }
+  ],
+  "maxFailuresBeforePrune": 14
+}

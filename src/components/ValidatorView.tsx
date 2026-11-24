@@ -245,7 +245,7 @@ export function ValidatorView({ initialJson }: ValidatorViewProps) {
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-[#EEF0F4] pt-3">
                       {Array.from(
-                        new Set(validCard.supportedInterfaces.map((i) => i.protocolBinding))
+                        new Set((validCard.supportedInterfaces ?? []).map((i) => i.protocolBinding))
                       ).map((binding) => (
                         <span
                           key={binding}
@@ -257,8 +257,8 @@ export function ValidatorView({ initialJson }: ValidatorViewProps) {
                         </span>
                       ))}
                       <span className="ml-1 font-mono text-[11px] text-[#6B7482]">
-                        {validCard.skills.length}{" "}
-                        {validCard.skills.length === 1 ? "skill" : "skills"}
+                        {(validCard.skills ?? []).length}{" "}
+                        {(validCard.skills ?? []).length === 1 ? "skill" : "skills"}
                       </span>
                     </div>
                   </div>

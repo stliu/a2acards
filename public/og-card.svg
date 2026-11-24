@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#F7F8FA"/>
+  <rect x="48" y="48" width="1104" height="534" rx="16" fill="#FFFFFF" stroke="#E2E6EC" stroke-width="2"/>
+  <rect x="96" y="100" width="56" height="56" rx="12" fill="#D1FAE5" stroke="#0A7C59" stroke-width="2.5"/>
+  <rect x="90" y="110" width="56" height="56" rx="12" fill="#FFFFFF" stroke="#111418" stroke-width="3"/>
+  <rect x="102" y="124" width="22" height="6" rx="3" fill="#0A7C59"/>
+  <rect x="102" y="137" width="32" height="5" rx="2.5" fill="#111418"/>
+  <rect x="102" y="148" width="24" height="5" rx="2.5" fill="#6B7482"/>
+  <text x="172" y="146" fill="#111418" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="38" font-weight="700">a2acards.com</text>
+  <rect x="448" y="116" width="118" height="36" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1.5"/>
+  <text x="507" y="140" text-anchor="middle" fill="#047857" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" font-weight="600">A2A v1.0</text>
+  <text x="96" y="254" fill="#111418" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="54" font-weight="700">Open A2A Agent Card Registry</text>
+  <text x="96" y="314" fill="#4F5866" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="28">Discover, inspect, and validate live /.well-known/agent-card.json endpoints.</text>
+  <rect x="96" y="380" width="170" height="44" rx="8" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+  <text x="181" y="408" text-anchor="middle" fill="#1D4ED8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" font-weight="600">JSONRPC</text>
+  <rect x="282" y="380" width="186" height="44" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1.5"/>
+  <text x="375" y="408" text-anchor="middle" fill="#047857" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" font-weight="600">HTTP+JSON</text>
+  <rect x="484" y="380" width="136" height="44" rx="8" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5"/>
+  <text x="552" y="408" text-anchor="middle" fill="#B45309" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" font-weight="600">GRPC</text>
+  <text x="96" y="518" fill="#6B7482" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="22">https://a2acards.com/.well-known/agent-card.json  ·  /registry/index.json</text>
+</svg>

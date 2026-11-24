@@ -8,6 +8,13 @@ export interface ValidationIssue {
   hint?: string;
 }
 
+export interface NormalizedInterface {
+  url: string;
+  protocolBinding: string;
+  protocolVersion: string;
+  tenant?: string;
+}
+
 export interface CardValidationResult {
   valid: boolean;
   errors: ValidationIssue[];
@@ -21,6 +28,8 @@ export interface RegistryValidationResult {
   warnings: ValidationIssue[];
 }
 
+export declare function extractInterfaces(card: Record<string, unknown>): NormalizedInterface[];
+export declare function isRecognizableAgentCard(input: unknown): boolean;
 export declare function validateAgentCard(input: unknown): CardValidationResult;
 export declare function validateRegistryEntry(
   entry: unknown,

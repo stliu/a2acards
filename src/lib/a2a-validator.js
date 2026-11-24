@@ -34,6 +34,58 @@ function parseHttpUrl(value) {
 }
 
 /**
+ * Extracts normalized transport interfaces from either A2A v1.0 (`supportedInterfaces`)
+ * or legacy v0.3 (`url` + `preferredTransport` + `additionalInterfaces`).
+ * @param {Record<string, any>} card
+ */
+export function extractInterfaces(card) {
+  if (!isRecord(card)) return [];
+  if (Array.isArray(card.supportedInterfaces) && card.supportedInterfaces.length > 0) {
+    return card.supportedInterfaces
+      .filter((iface) => isRecord(iface) && isNonEmptyString(iface.url))
+      .map((iface) => ({
+        url: String(iface.url).trim(),
+        protocolBinding: isNonEmptyString(iface.protocolBinding)
+          ? String(iface.protocolBinding).trim()
+          : "JSONRPC",
+        protocolVersion: isNonEmptyString(iface.protocolVersion)
+          ? String(iface.protocolVersion).trim()
+          : "1.0",
+        ...(isNonEmptyString(iface.tenant) ? { tenant: String(iface.tenant).trim() } : {}),
+      }));
+  }
+
+  const legacy = [];
+  if (isNonEmptyString(card.url)) {
+    legacy.push({
+      url: String(card.url).trim(),
+      protocolBinding: isNonEmptyString(card.preferredTransport)
+        ? String(card.preferredTransport).trim()
+        : "JSONRPC",
+      protocolVersion: isNonEmptyString(card.protocolVersion)
+        ? String(card.protocolVersion).trim()
+        : "0.3",
+    });
+  }
+  if (Array.isArray(card.additionalInterfaces)) {
+    for (const iface of card.additionalInterfaces) {
+      if (isRecord(iface) && isNonEmptyString(iface.url)) {
+        legacy.push({
+          url: String(iface.url).trim(),
+          protocolBinding: isNonEmptyString(iface.transport || iface.protocolBinding)
+            ? String(iface.transport || iface.protocolBinding).trim()
+            : "HTTP+JSON",
+          protocolVersion: isNonEmptyString(iface.protocolVersion || card.protocolVersion)
+            ? String(iface.protocolVersion || card.protocolVersion).trim()
+            : "0.3",
+        });
+      }
+    }
+  }
+  return legacy;
+}
+
+/**
  * Validates an A2A v1.0 Agent Card payload and detects v0.3 legacy patterns.
  * @param {unknown} input
  */
@@ -280,7 +332,7 @@ export function validateAgentCard(input) {
   }
 
   // Optional provider validation
-  if ("provider" in input && input.provider !== undefined) {
+  if ("provider" in input && input.provider !== undefined && input.provider !== null) {
     if (!isRecord(input.provider) || !isNonEmptyString(input.provider.organization) || !parseHttpUrl(input.provider.url)) {
       issues.push({
         path: "provider",
@@ -290,7 +342,7 @@ export function validateAgentCard(input) {
     }
   }
 
-  if ("documentationUrl" in input && input.documentationUrl !== undefined && !parseHttpUrl(input.documentationUrl)) {
+  if ("documentationUrl" in input && input.documentationUrl !== undefined && input.documentationUrl !== null && !parseHttpUrl(input.documentationUrl)) {
     issues.push({
       path: "documentationUrl",
       severity: "error",
@@ -298,7 +350,7 @@ export function validateAgentCard(input) {
     });
   }
 
-  if ("iconUrl" in input && input.iconUrl !== undefined && !parseHttpUrl(input.iconUrl)) {
+  if ("iconUrl" in input && input.iconUrl !== undefined && input.iconUrl !== null && !parseHttpUrl(input.iconUrl)) {
     issues.push({
       path: "iconUrl",
       severity: "error",
@@ -325,7 +377,22 @@ export function validateAgentCard(input) {
 }
 
 /**
- * Validates a registry entry wrapper stored under `registry/cards/<slug>.json`.
+ * Loose check used by the crawler to accept real-world live A2A Agent Cards (v1.0 or v0.3)
+ * even if they still carry legacy fields or minor schema warnings.
+ * @param {unknown} input
+ */
+export function isRecognizableAgentCard(input) {
+  if (!isRecord(input)) return false;
+  if (!isNonEmptyString(input.name) || !isNonEmptyString(input.description)) return false;
+  const interfaces = extractInterfaces(input);
+  if (interfaces.length === 0) return false;
+  const hasSkills = Array.isArray(input.skills) && input.skills.length > 0;
+  const hasCapabilities = isRecord(input.capabilities);
+  return hasSkills || hasCapabilities;
+}
+
+/**
+ * Validates a curated registry entry wrapper stored under `registry/cards/<slug>.json`.
  * @param {unknown} entry
  * @param {string} [expectedSlug]
  */

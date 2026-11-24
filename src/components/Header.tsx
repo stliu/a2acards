@@ -1,4 +1,4 @@
-import { CheckCircle2, Code2, ExternalLink, Layers, PlusCircle } from "lucide-react";
+import { BarChart3, CheckCircle2, Code2, ExternalLink, Layers, PlusCircle } from "lucide-react";
 
 export type AppTab = "directory" | "validator" | "submit";
 
@@ -19,7 +19,7 @@ export function Header({ activeTab, onSelectTab, totalCards }: HeaderProps) {
     <header className="sticky top-0 z-30 border-b border-[#E2E6EC] bg-white/95 backdrop-blur-sm">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex h-14 items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-6">
+          <div className="flex min-w-0 items-center gap-5">
             <button
               type="button"
               onClick={() => onSelectTab("directory")}
@@ -69,6 +69,14 @@ export function Header({ activeTab, onSelectTab, totalCards }: HeaderProps) {
                   </button>
                 );
               })}
+
+              <a
+                href="/stats/"
+                className="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[13px] font-medium text-[#4F5866] transition-colors hover:bg-[#F1F3F6] hover:text-[#111418]"
+              >
+                <BarChart3 className="h-3.5 w-3.5 shrink-0" />
+                <span>Stats</span>
+              </a>
             </nav>
           </div>
 
@@ -109,7 +117,7 @@ export function Header({ activeTab, onSelectTab, totalCards }: HeaderProps) {
                 key={item.id}
                 type="button"
                 onClick={() => onSelectTab(item.id)}
-                className={`inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md px-2 text-[12px] font-medium transition-colors ${
+                className={`inline-flex h-8 flex-1 items-center justify-center gap-1 rounded-md px-2 text-[12px] font-medium transition-colors ${
                   isActive
                     ? "bg-[#111418] text-white"
                     : "text-[#4F5866] hover:bg-[#F1F3F6] hover:text-[#111418]"
@@ -117,18 +125,16 @@ export function Header({ activeTab, onSelectTab, totalCards }: HeaderProps) {
               >
                 <Icon className="h-3.5 w-3.5 shrink-0" />
                 <span>{item.shortLabel}</span>
-                {item.id === "directory" && (
-                  <span
-                    className={`rounded px-1 font-mono text-[10px] ${
-                      isActive ? "bg-white/15 text-white" : "bg-[#E9ECF1] text-[#4F5866]"
-                    }`}
-                  >
-                    {totalCards}
-                  </span>
-                )}
               </button>
             );
           })}
+          <a
+            href="/stats/"
+            className="inline-flex h-8 items-center justify-center gap-1 rounded-md px-2.5 text-[12px] font-medium text-[#4F5866] hover:bg-[#F1F3F6] hover:text-[#111418]"
+          >
+            <BarChart3 className="h-3.5 w-3.5 shrink-0" />
+            <span>Stats</span>
+          </a>
         </nav>
       </div>
     </header>

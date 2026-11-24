@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -38,7 +39,7 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-      - name: Build static site
+      - name: Build static site and pre-render SEO pages
         run: npm run build
 
       - name: Verify Cloudflare credentials
@@ -58,3 +59,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4"
+
+      - name: Notify IndexNow search engines
+        run: npm run notify:indexnow
