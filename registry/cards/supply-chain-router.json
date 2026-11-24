@@ -1,0 +1,59 @@
+{
+  "slug": "supply-chain-router",
+  "category": "Finance & Ops",
+  "status": "reference",
+  "cardUrl": "https://logistics.a2a-reference.example.com/.well-known/agent-card.json",
+  "updatedAt": "2026-11-12",
+  "card": {
+    "name": "Freight & Customs Exception Router",
+    "description": "Monitors carrier milestones, flags port or customs holds, and proposes re-routing options across air and ocean lanes.",
+    "version": "1.2.4",
+    "provider": {
+      "organization": "CargoNet Reference",
+      "url": "https://a2a-protocol.org"
+    },
+    "supportedInterfaces": [
+      {
+        "url": "https://logistics.a2a-reference.example.com/a2a/v1",
+        "protocolBinding": "HTTP+JSON",
+        "protocolVersion": "1.0"
+      }
+    ],
+    "capabilities": {
+      "streaming": false,
+      "pushNotifications": true,
+      "extendedAgentCard": false
+    },
+    "defaultInputModes": [
+      "application/json",
+      "text/plain"
+    ],
+    "defaultOutputModes": [
+      "application/json"
+    ],
+    "securitySchemes": {
+      "partnerApiKey": {
+        "apiKeySecurityScheme": {
+          "name": "X-Partner-Key",
+          "in": "header"
+        }
+      }
+    },
+    "skills": [
+      {
+        "id": "reroute-delayed-shipment",
+        "name": "Delay Mitigation Planner",
+        "description": "Scores alternative carrier lanes by SLA recovery time, landed cost delta, and customs clearance rules.",
+        "tags": [
+          "logistics",
+          "freight",
+          "supply-chain",
+          "customs"
+        ],
+        "examples": [
+          "Find fastest recovery lane for container MSKU492811 delayed in Rotterdam"
+        ]
+      }
+    ]
+  }
+}

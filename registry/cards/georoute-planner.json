@@ -1,0 +1,54 @@
+{
+  "slug": "georoute-planner",
+  "category": "Travel & Commerce",
+  "status": "reference",
+  "cardUrl": "https://georoute.a2a-reference.example.com/.well-known/agent-card.json",
+  "updatedAt": "2026-11-22",
+  "card": {
+    "name": "GeoSpatial Route Planner Agent",
+    "description": "Computes multi-stop driving, cycling, and EV-charging routes with traffic awareness and GeoJSON polyline output.",
+    "version": "1.3.0",
+    "provider": {
+      "organization": "A2A Mobility Reference",
+      "url": "https://a2a-protocol.org"
+    },
+    "supportedInterfaces": [
+      {
+        "url": "https://georoute.a2a-reference.example.com/a2a/v1",
+        "protocolBinding": "JSONRPC",
+        "protocolVersion": "1.0"
+      }
+    ],
+    "capabilities": {
+      "streaming": true,
+      "pushNotifications": false,
+      "extendedAgentCard": false
+    },
+    "defaultInputModes": [
+      "text/plain",
+      "application/json"
+    ],
+    "defaultOutputModes": [
+      "application/geo+json",
+      "application/json",
+      "text/plain"
+    ],
+    "skills": [
+      {
+        "id": "multi-stop-route",
+        "name": "Multi-Stop Route Optimization",
+        "description": "Solves waypoint ordering under time windows, toll preferences, and EV battery range constraints.",
+        "tags": [
+          "geospatial",
+          "maps",
+          "routing",
+          "ev",
+          "geojson"
+        ],
+        "examples": [
+          "Optimize a 6-stop technician route in Vancouver between 9am and 3pm"
+        ]
+      }
+    ]
+  }
+}

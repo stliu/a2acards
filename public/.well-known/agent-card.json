@@ -1,0 +1,46 @@
+{
+  "name": "A2A Cards Registry",
+  "description": "Open directory and schema validator for Agent2Agent (A2A) v1.0 Agent Cards. Exposes a static machine-readable catalog at /registry/index.json.",
+  "version": "0.1.0",
+  "provider": {
+    "organization": "a2acards.com",
+    "url": "https://a2acards.com"
+  },
+  "documentationUrl": "https://github.com/stliu/a2acards",
+  "iconUrl": "https://a2acards.com/favicon.svg",
+  "supportedInterfaces": [
+    {
+      "url": "https://a2acards.com/registry/index.json",
+      "protocolBinding": "HTTP+JSON",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "extendedAgentCard": false
+  },
+  "defaultInputModes": ["application/json", "text/plain"],
+  "defaultOutputModes": ["application/json"],
+  "skills": [
+    {
+      "id": "discover-agent-cards",
+      "name": "Discover A2A Agent Cards",
+      "description": "Retrieve the curated directory of A2A v1.0 Agent Cards indexed by category, protocol binding, capabilities, and skill tags.",
+      "tags": ["directory", "discovery", "registry", "a2a", "agent-card"],
+      "examples": [
+        "GET https://a2acards.com/registry/index.json",
+        "List all A2A agents supporting JSONRPC and streaming"
+      ]
+    },
+    {
+      "id": "validate-agent-card",
+      "name": "Validate A2A v1.0 Agent Card",
+      "description": "Inspect an agent-card.json manifest for A2A v1.0 schema compliance and v0.3 migration issues via the web validator.",
+      "tags": ["validation", "schema", "lint", "a2a-v1"],
+      "examples": [
+        "Validate /.well-known/agent-card.json against A2A 1.0 required fields"
+      ]
+    }
+  ]
+}

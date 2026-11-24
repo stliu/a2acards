@@ -1,0 +1,79 @@
+{
+  "slug": "k8s-incident-responder",
+  "category": "Coding & Dev",
+  "status": "reference",
+  "cardUrl": "https://k8s-sre.a2a-reference.example.com/.well-known/agent-card.json",
+  "updatedAt": "2026-11-18",
+  "signed": true,
+  "card": {
+    "name": "Kubernetes Incident Triager",
+    "description": "Correlates pod crash loops, OOM kills, and recent rollout revisions to isolate root causes and draft rollback runbooks.",
+    "version": "1.4.2",
+    "provider": {
+      "organization": "CloudOps Reference Lab",
+      "url": "https://a2a-protocol.org"
+    },
+    "supportedInterfaces": [
+      {
+        "url": "https://k8s-sre.a2a-reference.example.com/a2a.v1.A2AService",
+        "protocolBinding": "GRPC",
+        "protocolVersion": "1.0"
+      },
+      {
+        "url": "https://k8s-sre.a2a-reference.example.com/a2a/v1",
+        "protocolBinding": "JSONRPC",
+        "protocolVersion": "1.0"
+      }
+    ],
+    "capabilities": {
+      "streaming": true,
+      "pushNotifications": true,
+      "extendedAgentCard": true
+    },
+    "defaultInputModes": [
+      "application/json",
+      "text/plain"
+    ],
+    "defaultOutputModes": [
+      "application/json",
+      "text/markdown"
+    ],
+    "securitySchemes": {
+      "clusterMtls": {
+        "mtlsSecurityScheme": {
+          "description": "Mutual TLS client certificate issued by cluster workload identity."
+        }
+      }
+    },
+    "skills": [
+      {
+        "id": "triage-pod-crashloop",
+        "name": "CrashLoopBackOff Triage",
+        "description": "Inspects container exit codes, recent events, and config diffs to pinpoint startup failures.",
+        "tags": [
+          "kubernetes",
+          "sre",
+          "incident",
+          "observability"
+        ],
+        "examples": [
+          "Investigate CrashLoopBackOff on payments-api in prod-us-west"
+        ]
+      },
+      {
+        "id": "draft-rollback-plan",
+        "name": "Rollback Runbook Generator",
+        "description": "Produces verifiable helm/kubectl rollback commands with pre- and post-check probes.",
+        "tags": [
+          "rollback",
+          "runbook",
+          "helm",
+          "devops"
+        ],
+        "examples": [
+          "Prepare safe rollback plan for ingress-gateway revision 84"
+        ]
+      }
+    ]
+  }
+}

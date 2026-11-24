@@ -1,0 +1,54 @@
+{
+  "slug": "design-system-auditor",
+  "category": "Creative & Media",
+  "status": "reference",
+  "cardUrl": "https://design-audit.a2a-reference.example.com/.well-known/agent-card.json",
+  "updatedAt": "2026-11-19",
+  "card": {
+    "name": "UI Accessibility & Token Auditor",
+    "description": "Inspects rendered UI screenshots and design token JSON for WCAG AA contrast violations, spacing drift, and responsive overflow.",
+    "version": "1.2.0",
+    "provider": {
+      "organization": "DesignOps Reference",
+      "url": "https://a2a-protocol.org"
+    },
+    "supportedInterfaces": [
+      {
+        "url": "https://design-audit.a2a-reference.example.com/a2a/v1",
+        "protocolBinding": "HTTP+JSON",
+        "protocolVersion": "1.0"
+      }
+    ],
+    "capabilities": {
+      "streaming": true,
+      "pushNotifications": false,
+      "extendedAgentCard": false
+    },
+    "defaultInputModes": [
+      "image/png",
+      "image/webp",
+      "application/json"
+    ],
+    "defaultOutputModes": [
+      "application/json",
+      "text/markdown"
+    ],
+    "skills": [
+      {
+        "id": "wcag-contrast-audit",
+        "name": "WCAG Contrast & Layout Check",
+        "description": "Detects low-contrast text, overlapping labels, and token mismatches across desktop and mobile captures.",
+        "tags": [
+          "design-system",
+          "a11y",
+          "wcag",
+          "ui",
+          "tokens"
+        ],
+        "examples": [
+          "Check this mobile checkout screenshot against WCAG 2.2 AA contrast thresholds"
+        ]
+      }
+    ]
+  }
+}
