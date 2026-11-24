@@ -11,10 +11,6 @@
     {
       "pattern": "a2acards.com",
       "custom_domain": true
-    },
-    {
-      "pattern": "www.a2acards.com",
-      "custom_domain": true
     }
   ]
 }

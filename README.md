@@ -43,4 +43,4 @@ Configure two GitHub repository secrets in **Settings -> Secrets and variables -
 | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare Account ID |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API Token with **Account -> Workers Scripts: Edit**, **Zone -> Workers Routes: Edit**, **Zone -> DNS: Edit**, and **Zone -> Zone: Read** for `a2acards.com` |
 
-With `custom_domain: true` configured in `wrangler.jsonc`, Wrangler automatically provisions DNS and SSL certificates for `a2acards.com` and `www.a2acards.com` on deploy.
+With `custom_domain: true` configured in `wrangler.jsonc`, Wrangler automatically provisions DNS and SSL certificates for `a2acards.com` on deploy (`www.a2acards.com` already 301-redirects to `https://a2acards.com/`).
