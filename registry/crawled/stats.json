@@ -1,10 +1,10 @@
 {
-  "lastCrawledAt": "2026-11-24T19:58:33.110Z",
-  "probedCandidates": 163,
-  "online": 163,
-  "unreachableKept": 0,
+  "lastCrawledAt": "2026-11-25T17:16:54.488Z",
+  "probedCandidates": 169,
+  "online": 168,
+  "unreachableKept": 1,
   "rejectedOrSkipped": 0,
-  "v1Valid": 67,
-  "legacyV03": 94,
-  "mixed": 42
+  "v1Valid": 72,
+  "legacyV03": 95,
+  "mixed": 44
 }
